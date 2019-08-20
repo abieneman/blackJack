@@ -78,6 +78,13 @@ class Deck {
         return this.deck.pop();
     }
 
+    getNumCards() {
+        if(this.deck.length == 0) {
+            return 52;
+        }
+        return this.deck.length;
+    }
+
     needToShuffle() {
         if(this.deck.length < 20) {
             return true;

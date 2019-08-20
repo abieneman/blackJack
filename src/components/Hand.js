@@ -7,6 +7,7 @@ class Hand {
         this.numCards = 0;
         this.player = player;
         this.turn = "player";
+        this.numAces = 0;
     }
 
     setTurn(turn) {
@@ -17,6 +18,14 @@ class Hand {
         let value = 0;
         for(let i = 0; i < this.numCards; i++) {
             value += this.hand[i].value;
+        }
+        let tempAces = this.numAces;
+        while( (value > 21) && (tempAces > 0) ) {
+            value -= 10;
+            tempAces--;
+        }
+        if(value == 0) {
+            return "";
         }
         return value;
     }
@@ -34,9 +43,13 @@ class Hand {
         }
         return returnHand;
     }
+    
     addCard(newCard)  {
         this.hand.push(newCard);
         this.numCards++;
+        if(newCard.char == 'A') {
+            this.numAces++;
+        }
     }
 }
 
