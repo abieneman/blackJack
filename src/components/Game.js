@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import Deck from './Deck';
 import Card from "./Card";
 import Hand from "./Hand";
+import { thisExpression } from "@babel/types";
 
 //let myDeck;
 
@@ -22,7 +23,11 @@ class Game extends Component {
         handOver: true,
         isStart: false,
         bet: 5,
-        bank: 100
+        bank: 100,
+        canDoubleDown: true,
+        didDoubleDown: false,
+        canHit: true,
+        mustHit: false
     };
 
     // initialize() {
@@ -47,9 +52,14 @@ class Game extends Component {
     }
 
     handleHit = (e) => {
-        e.preventDefault();
+        if(e) {
+            e.preventDefault();
+        }
         this.setState({isStart: false});
-        if(!this.state.handOver) {
+        if( (!this.state.handOver) && (this.state.canHit) ) {
+            if(this.state.didDoubleDown) {
+                this.setState({canHit: false, mustHit: false});
+            }
             if(!this.state.busted) {
                 this.state.playerHand.addCard(this.state.myDeck.getTopCard());
                 if(this.state.playerHand.getValue() > 21) {
@@ -57,7 +67,10 @@ class Game extends Component {
                     this.setState({
                         busted: true,
                         handResult: "player busted",
-                        handOver: true
+                        handOver: true,
+                        canDoubleDown: true,
+                        didDoubleDown: false,
+                        canHit: true
                     });
                 }
             }
@@ -90,11 +103,20 @@ class Game extends Component {
     }
 
     handleStay = (e) => {
-        e.preventDefault();
-        if(!this.state.handOver) {
-            this.setState( {playerTurn: false});
+        if(e) {
+            e.preventDefault();
+        }
+        if( (!this.state.handOver) && (!this.state.mustHit) ) {
+            this.setState( {playerTurn: false, mustHit: false});
         }
         this.forceUpdate();
+    }
+
+    handleDoubleDown = (e) => {
+        e.preventDefault();
+        if( (this.state.playerHand.numCards == 2) && (this.state.canDoubleDown) && !(this.state.handOver)) {
+            this.setState({bet: this.state.bet * 2, canDoubleDown: false, didDoubleDown: true, mustHit: true});
+        }
     }
 
     handleNewHand = (e) => {
@@ -129,10 +151,16 @@ class Game extends Component {
         if(this.state.bet > this.state.bank) {
             this.state.bet = this.state.bank;
         }
+        if(this.state.didDoubleDown) {
+            this.state.bet /= 2
+        }
     }
 
     win() {
         this.state.bank += this.state.bet;
+        if(this.state.didDoubleDown) {
+            this.state.bet /= 2
+        }
     }
 
     render() {
@@ -159,17 +187,21 @@ class Game extends Component {
             while(this.state.dealerHand.getValue() < 17) {
                 this.state.dealerHand.addCard(this.state.myDeck.getTopCard());
             }
+            this.setState({canDoubleDown: true, didDoubleDown: false, canHit: true})
             if(this.state.dealerHand.getValue() > 21) {
                 this.win();
-                this.setState({handResult: "dealer busts", handOver: true});
+                this.setState({handResult: "dealer busts", handOver: true, canDoubleDown: true, didDoubleDown: false, canHit: true});
             } else if(this.state.dealerHand.getValue() == this.state.playerHand.getValue()) {
-                this.setState({handResult: "push", handOver: true});
+                if(this.state.didDoubleDown) {
+                    this.state.bet /= 2;
+                }
+                this.setState({handResult: "push", handOver: true, canDoubleDown: true, didDoubleDown: false, canHit: true});
             } else if(this.state.dealerHand.getValue() > this.state.playerHand.getValue()) {
                 this.lose();
-                this.setState({handResult: "dealer wins", handOver: true});
+                this.setState({handResult: "dealer wins", handOver: true, canDoubleDown: true, didDoubleDown: false, canHit: true});
             } else if(this.state.dealerHand.getValue() < this.state.playerHand.getValue()) {
                 this.win();
-                this.setState({handResult: "player wins", handOver: true});
+                this.setState({handResult: "player wins", handOver: true, canDoubleDown: true, didDoubleDown: false, canHit: true});
             }
             this.setState({playerTurn: true});
             // this.state.dealerHand.setTurn("player");
@@ -187,6 +219,9 @@ class Game extends Component {
                 </form>
                 <form onSubmit={this.handleStay}>
                     <button>stay</button>
+                </form>
+                <form onSubmit={this.handleDoubleDown}>
+                    <button>Double Down</button>
                 </form>
                 <p>{this.state.handResult}</p>
                 <form onSubmit={this.handleNewHand}> 
