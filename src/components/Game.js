@@ -24,6 +24,8 @@ class Game extends Component {
         isStart: false,
         bet: 5,
         bank: 100,
+
+        
         canDoubleDown: true,
         didDoubleDown: false,
         canHit: true,
@@ -164,6 +166,12 @@ class Game extends Component {
     }
 
     render() {
+        if(this.state.bank < 1) {
+            this.setState({bank: 100});
+        }
+        if(this.state.bet < 0) {
+            this.setState({bet: 1});
+        }
         //this.state.myDeck = new Deck();
 
         // if(!this.state.initialized) {
