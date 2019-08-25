@@ -6,35 +6,63 @@ class Card extends Component {
         this.imageName = "backred.jpg";
         this.char = 'z';
         this.suit = 'x';
-
+        this.flipped = false;
     }
-    getImageName() {
-        return "../images/cards/2H.jpg";
-        if(this.char == 'z') {
-            return "../images/cards/backred.jpg";
+
+    flip() {
+        if(this.flipped) {
+            this.flipped = false;
+        } else {
+            this.flipped = true;
         }
-        let suitChar = 'x';
+    }
+
+    getImageName() {
+
+        if(this.flipped) {
+            return 52;
+        }
+
+        let valuePath = 0;
+
+        switch(this.value) {
+            case 10:
+                if(this.char == 'T') {
+                    valuePath = 10;
+                } else if(this.char == 'J') {
+                    valuePath = 11;
+                } else if(this.char == 'Q') {
+                    valuePath = 12;
+                } else if(this.char == 'K') {
+                    valuePath = 13;
+                }
+                break;
+            case 11:
+                valuePath = 1;
+                break;
+            default:
+                valuePath = this.value;
+                break;
+        }
+        valuePath--;
         switch(this.suit) {
             case '♥':
-                suitChar = 'H';
+                //doNothing()
                 break;
 
             case '♣':
-                suitChar= 'C';
+                valuePath += 13;
                 break;
 
             case '♦':
-                suitChar= 'D';
+                valuePath += 26;
                 break;
 
             case '♠':
-                suitChar= 'S';
+                valuePath += 39;
                 break;
         }
-        this.imageName = "../images/cards/";
-        this.imageName += this.char;
-        this.imageName += suitChar;
-        this.imageName += ".jpg";
+        return valuePath;
     }
 }
 
