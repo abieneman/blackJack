@@ -60,7 +60,6 @@ class Poker extends Component {
             require("../images/cards/KS.jpg"),
             require("../images/cards/backred.jpg"),
         ];
-        this.flip = this.flip.bind(this);
     }
     state = {
         card1: new Card(),
@@ -69,7 +68,10 @@ class Poker extends Component {
         card4: new Card(),
         card5: new Card(),
         myDeck: new Deck(),
-        testString: "../images/cards/4H.jpg"
+        testString: "../images/cards/4H.jpg",
+        turn: 0,
+        bank: 100,
+        bet: 1
     };
 
     initialize() {
@@ -83,34 +85,81 @@ class Poker extends Component {
             card4: this.state.myDeck.getTopCard(),
             card5: this.state.myDeck.getTopCard()
         });
+        this.state.card1.flip();
     }
 
     
 
-    flip(e) {
-        switch(e.target.name) {
-            case "one":
-                this.state.card1.flip();
-                break;
-            case "two":
-                this.state.card2.flip();
-                break;
-            case "three":
-                this.state.card3.flip();
-                break;
-            case "four":
-                this.state.card4.flip();
-                break;
-            case "five":
-                this.state.card5.flip();
-                break;
+    flip = (e) => {
+        if(this.state.turn == 0) {
+            switch(e.target.name) {
+                case "one":
+                    this.state.card1.flip();
+                    break;
+                case "two":
+                    this.state.card2.flip();
+                    break;
+                case "three":
+                    this.state.card3.flip();
+                    break;
+                case "four":
+                    this.state.card4.flip();
+                    break;
+                case "five":
+                    this.state.card5.flip();
+                    break;
+            }
+            this.forceUpdate();
+        }
+    }
+
+    newCards = (e) => {
+        e.preventDefault();
+        console.log(e.target.name);
+        if(this.state.turn == 0) {
+            if(this.state.card1.flipped) {
+                this.state.card1 = this.state.myDeck.getTopCard();
+            }
+            if(this.state.card2.flipped) {
+                this.state.card2 = this.state.myDeck.getTopCard();
+            }
+            if(this.state.card3.flipped) {
+                this.state.card3 = this.state.myDeck.getTopCard();
+            }
+            if(this.state.card4.flipped) {
+                this.state.card4 = this.state.myDeck.getTopCard();
+            }
+            if(this.state.card5.flipped) {
+                this.state.card5 = this.state.myDeck.getTopCard();
+            }
+            this.state.turn++;
         }
         this.forceUpdate();
     }
 
-    testSubmit = (e) => {
-        e.preventDefault();
+    handleRadio = (e) => {
+        console.log("the target is: " + e.target.value);
+        this.setState({bet: parseInt(e.target.value)});
+        console.log(this.state.bet + 100);
+        console.log("the bet is!!!!:: " + this.state.bet);
         this.forceUpdate();
+    }
+
+    nextHand = (e) => {
+        e.preventDefault();
+        if(this.state.turn == 1) {
+            this.state.myDeck.makeDeck();
+            this.state.myDeck.shuffleDeck();
+            this.setState({
+            card1: this.state.myDeck.getTopCard(),
+            card2: this.state.myDeck.getTopCard(),
+            card3: this.state.myDeck.getTopCard(),
+            card4: this.state.myDeck.getTopCard(),
+            card5: this.state.myDeck.getTopCard(),
+            turn: 0
+            });
+            
+        }
     }
 
     render() {
@@ -126,9 +175,19 @@ class Poker extends Component {
                 <img name="three" src={this.Image[this.state.card3.getImageName()]} onClick={this.flip} width="10%" height="10%" alt="My Pic"></img>
                 <img name="four" src={this.Image[this.state.card4.getImageName()]} onClick={this.flip} width="10%" height="10%" alt="My Pic"></img>
                 <img name="five" src={this.Image[this.state.card5.getImageName()]} onClick={this.flip} width="10%" height="10%" alt="My Pic"></img>
-                <form onSubmit={this.testSubmit}>
-                    <button>Bet+</button>
+                <form name="theFormName">
+                    <button name="trade" onClick={this.newCards}>Trade in cards</button>
+                    <button name="nextHand" onClick={this.nextHand}>Next Hand</button>
                 </form>
+                <div>
+                    Bet:<input id="11" type="radio" disabled={!this.state.turn} name="radioSelect" value="1" onClick={this.handleRadio}/>1
+                    <input id="22" type="radio" disabled={!this.state.turn} name="radioSelect" value="2" onClick={this.handleRadio} />2
+                    <input id="33" type="radio" disabled={!this.state.turn} name="radioSelect" value="3" onClick={this.handleRadio} />3 
+                    <input id="44" type="radio" disabled={!this.state.turn} name="radioSelect" value="4" onClick={this.handleRadio} />4
+                    <input id="55" type="radio" disabled={!this.state.turn} name="radioSelect" value="5" onClick={this.handleRadio} />5 <br/>
+                </div>
+                <p>bank: {this.state.bank}</p>
+                {/* onSubmit={this.newCards} */}
             </div>
         );
     }
