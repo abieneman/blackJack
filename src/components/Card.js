@@ -16,6 +16,23 @@ class Card extends Component {
             this.flipped = true;
         }
     }
+    getPokerValue() {
+        if(this.value < 10) {
+            return this.value;
+        }
+        switch(this.char) {
+            case 'T':
+                return 10;
+            case 'J':
+                return 11;
+            case 'Q':
+                return 12;
+            case 'K':
+                return 13;
+            case 'A':
+                return 14;
+        }
+    }
 
     getImageName() {
 

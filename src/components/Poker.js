@@ -71,7 +71,10 @@ class Poker extends Component {
         testString: "../images/cards/4H.jpg",
         turn: 0,
         bank: 100,
-        bet: 1
+        bet: 1,
+        initialized: false,
+        payMessage: "Trade in cards",
+        payColor: "blue"
     };
 
     initialize() {
@@ -115,7 +118,6 @@ class Poker extends Component {
 
     newCards = (e) => {
         e.preventDefault();
-        console.log(e.target.name);
         if(this.state.turn == 0) {
             if(this.state.card1.flipped) {
                 this.state.card1 = this.state.myDeck.getTopCard();
@@ -138,16 +140,16 @@ class Poker extends Component {
     }
 
     handleRadio = (e) => {
-        console.log("the target is: " + e.target.value);
         this.setState({bet: parseInt(e.target.value)});
-        console.log(this.state.bet + 100);
-        console.log("the bet is!!!!:: " + this.state.bet);
         this.forceUpdate();
     }
 
     nextHand = (e) => {
         e.preventDefault();
-        if(this.state.turn == 1) {
+        if(this.state.turn == 3) {
+            this.setState({payMessage: "Trade in cards",
+                           payColor: "blue"
+                        });
             this.state.myDeck.makeDeck();
             this.state.myDeck.shuffleDeck();
             this.setState({
@@ -161,10 +163,92 @@ class Poker extends Component {
             
         }
     }
+    scoreHand() {
+        this.setState({ payMessage: this.scoreHandHelper(),
+                        turn: 3});
+        this.forceUpdate();
+    }
+
+    scoreHandHelper() {
+        let valueArray = [];
+        let flush = false;
+        this.setState({payColor: "green"});
+        let charSuit = this.state.card1.suit;
+
+        if( (this.state.card2.suit == charSuit) && (this.state.card3.suit == charSuit) && (this.state.card4.suit == charSuit) && (this.state.card5.suit == charSuit) ) {
+            flush = true;
+        }
+        valueArray.push(this.state.card1.getPokerValue());
+        valueArray.push(this.state.card2.getPokerValue());
+        valueArray.push(this.state.card3.getPokerValue());
+        valueArray.push(this.state.card4.getPokerValue());
+        valueArray.push(this.state.card5.getPokerValue());
+        valueArray.sort(function(a,b) { return a - b; });
+
+        if(flush && (valueArray[0] == 10) ) {
+            this.setState({bank: (this.state.bank + (500 * this.state.bet))});
+            return "Royal Flush  + 500x Bet"
+        }
+        let topOfStraightValue = (valueArray[0] + 4)
+        if( ( ((valueArray[1] + 3) == topOfStraightValue) && ((valueArray[2] + 2) == topOfStraightValue) && ((valueArray[3] + 1) == topOfStraightValue) && ((valueArray[4] + 0) == topOfStraightValue) )
+          || (valueArray[0] == 2) && (valueArray[1] == 3) && (valueArray[2] == 4) && (valueArray[3] == 5) && (valueArray[4] == 14) ) {
+            if(flush) {
+                this.setState({bank: (this.state.bank + (100 * this.state.bet))});
+                return "Straight Flush  + 100x Bet"
+            } else {
+                this.setState({bank: (this.state.bank + (8 * this.state.bet))});
+                return "Straight  + 8x Bet"
+            }
+        }
+        if(flush) {
+            this.setState({bank: (this.state.bank + (12 * this.state.bet))});
+            return "Flush  + 12x Bet"
+        }
+
+        let pairsArray = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+        let pairsValue = 0;
+
+        for(let i = 0; i < 5; i++) {
+            pairsValue = (valueArray[i] - 2);
+            pairsArray[pairsValue]++;
+        }
+        let pairValue = pairsArray.indexOf(2);
+        pairsArray.sort(function(a,b) { return a - b; });
+
+        if(pairsArray[12] == 4) {
+            this.setState({bank: (this.state.bank + (50 * this.state.bet))});
+            return "4 of a kind + 50x Bet";
+        }
+        if(pairsArray[12] == 3) {
+            if(pairsArray[11] == 2) {
+                this.setState({bank: (this.state.bank + (18 * this.state.bet))});
+                return "Full House  + 18x Bet";
+            } else {
+                this.setState({bank: (this.state.bank + (6 * this.state.bet))});
+                return "3 of a kind + 6x Bet";
+            }
+        }
+        if( (pairsArray[12] == 2) && (pairsArray[11] == 2) ) {
+            this.setState({bank: (this.state.bank + (4 * this.state.bet))});
+            return "2 pair + 4x Bet"
+        }
+        if( (pairsArray[12] == 2) && (pairValue > 8) ) {
+            this.setState({bank: (this.state.bank + (2 * this.state.bet))});
+            return "Jacks or better + 2x Bet";
+        }
+
+        this.setState({payColor: "red",
+                       bank: (this.state.bank - (1 * this.state.bet))
+                    });
+        return "No Score";
+    }
 
     render() {
         if(!this.state.initialized) {
             this.initialize();
+        }
+        if(this.state.turn == 1) {
+            this.scoreHand();
         }
         return(
             <div>
@@ -186,7 +270,11 @@ class Poker extends Component {
                     <input id="44" type="radio" disabled={!this.state.turn} name="radioSelect" value="4" onClick={this.handleRadio} />4
                     <input id="55" type="radio" disabled={!this.state.turn} name="radioSelect" value="5" onClick={this.handleRadio} />5 <br/>
                 </div>
+                <font color={this.state.payColor}>{"" + this.state.payMessage}</font>
                 <p>bank: {this.state.bank}</p>
+                <form onSubmit={this.scoreHand}>
+                    <button>score</button>
+                </form>
                 {/* onSubmit={this.newCards} */}
             </div>
         );

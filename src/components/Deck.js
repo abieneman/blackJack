@@ -4,6 +4,7 @@ import Card from "./Card"
 class Deck {
     constructor() {
         this.deck = [];
+        this.test = 2;
     }
 
     makeDeck()  {
