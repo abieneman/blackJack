@@ -7,6 +7,7 @@ function Home() {
         <h2>Home</h2>
         <ul><Link to="/blackjack">blackjack</Link></ul>
         <ul><Link to="/poker">Video Poker</Link></ul>
+        <ul><Link to="/highscores">Leader Board</Link></ul>
       </div>
     )
   }

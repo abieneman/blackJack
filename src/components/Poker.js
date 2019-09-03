@@ -88,7 +88,6 @@ class Poker extends Component {
             card4: this.state.myDeck.getTopCard(),
             card5: this.state.myDeck.getTopCard()
         });
-        this.state.card1.flip();
     }
 
     
@@ -253,7 +252,6 @@ class Poker extends Component {
         return(
             <div>
                 <p>Welcome to video poker!</p>
-                {/* this.state.testString */}
                 <img name="one" src={this.Image[this.state.card1.getImageName()]} onClick={this.flip} width="10%" height="10%" alt="My Pic"></img>
                 <img name="two" src={this.Image[this.state.card2.getImageName()]} onClick={this.flip} width="10%" height="10%" alt="My Pic"></img>
                 <img name="three" src={this.Image[this.state.card3.getImageName()]} onClick={this.flip} width="10%" height="10%" alt="My Pic"></img>
@@ -272,10 +270,6 @@ class Poker extends Component {
                 </div>
                 <font color={this.state.payColor}>{"" + this.state.payMessage}</font>
                 <p>bank: {this.state.bank}</p>
-                <form onSubmit={this.scoreHand}>
-                    <button>score</button>
-                </form>
-                {/* onSubmit={this.newCards} */}
             </div>
         );
     }
