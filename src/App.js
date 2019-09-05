@@ -6,9 +6,6 @@ import Routing from "./components/Routing"
 function App() {
   return (
     <Routing/>
-    // <div className="App">
-    //   <Game />
-    // </div>
   );
 }
 
