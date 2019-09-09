@@ -23,7 +23,12 @@ class Game extends Component {
         handOver: true,
         isStart: false,
         bet: 5,
-        bank: 100,
+
+        bank: this.props.bank,
+        lastSavedBank: this.props.bank,
+        userName: this.props.userName,
+        id: this.props.id,
+        
 
         
         canDoubleDown: true,
@@ -101,7 +106,29 @@ class Game extends Component {
     }
 
     handleStartOver = (e) => {
-        //it just refreshes the page
+        e.preventDefault();
+        this.setState({bank: this.state.lastSavedBank});
+    }
+
+    handleSaveBank = (e) => {
+        e.preventDefault();
+        this.setState({lastSavedBank: this.state.bank })
+        if(this.state.id == -1) {
+            return;
+        }
+
+        let updateBank = { id: this.state.id, bank: this.state.bank };
+        const body = JSON.stringify(updateBank);
+        const method = "PUT"
+        const headers = {'Content-Type': 'application/json'}
+        
+        fetch(process.env.REACT_APP_API, {
+            method,
+            headers,
+            body
+        })
+        .then(response => response.json())
+        .catch(error => console.error(error))
     }
 
     handleStay = (e) => {
@@ -145,7 +172,7 @@ class Game extends Component {
 
     blackJack() {
         this.setState({handResult: "blackjack", handOver: true, isStart: false});
-        this.state.bank += Math.round(this.state.bet * 1.5);
+        this.state.bank += Math.round(this.state.bet * 3);
     }
 
     lose() {
@@ -159,7 +186,7 @@ class Game extends Component {
     }
 
     win() {
-        this.state.bank += this.state.bet;
+        this.state.bank += (2 * this.state.bet);
         if(this.state.didDoubleDown) {
             this.state.bet /= 2
         }
@@ -172,11 +199,6 @@ class Game extends Component {
         if(this.state.bet < 0) {
             this.setState({bet: 1});
         }
-        //this.state.myDeck = new Deck();
-
-        // if(!this.state.initialized) {
-        //     this.initialize();
-        // }
 
         if(this.state.dealNew) {
             this.dealNew();
@@ -219,6 +241,7 @@ class Game extends Component {
 
         return (
             <div>
+                <p>Welcome, {this.state.userName}</p>
                 <p>Cards in deck: {this.state.myDeck.getNumCards()}</p>
                 <p>dealer: {this.state.dealerHand.getCards()} </p>
                 <p>player: {this.state.playerHand.getCards()} {this.state.playerHand.getValue()}</p>
@@ -244,7 +267,10 @@ class Game extends Component {
                 <p>Bet: {this.state.bet}</p>
                 <p>Bank: {this.state.bank}</p>
                 <form onSubmit={this.handleStartOver}>
-                    <button>Start Over</button>
+                    <button>Load Last Saved bank</button>
+                </form>
+                <form onSubmit={this.handleSaveBank}>
+                    <button>Save Your Bank Progress</button>
                 </form>
             </div>
         );

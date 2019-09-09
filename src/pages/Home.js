@@ -8,11 +8,11 @@ class Home extends Component {
       super(props)
     }
     state = {
-      name: "bob",
-      userName: "",
-      password: false,
+      name: "",
+      userName: "Guest",
+      password: "",
       action: -1,
-      bank: -1,
+      bank: 100,
       id: -1,
       msg: "Login, Create or Delete an Account",
       delete: false,
@@ -21,52 +21,46 @@ class Home extends Component {
 
     create = (e) => {
       e.preventDefault();
+      this.setState({delete: false});
       this.state.action = "create";
       const body = JSON.stringify(this.state);
       const method = "POST"
       const headers = {'Content-Type': 'application/json'}
       
-      fetch("http://localhost:5000", {
+      fetch(process.env.REACT_APP_API, {
           method,
           headers,
           body
       })
       .then(response => response.json())
       .then(body => {
-        console.log(body.msg);
-        if(body.msg == "wrong password") {
-          this.setState({msg: "Incorrect Password"});
-        } else if(body.msg == "Cannot read property 'password' of undefined") {
-          this.setState({msg: "Cannot find user"});
-        } else {
-          console.log(body);
-          this.setState({hidden: "visibility: hidden", userName: body.name, bank: body.bank, id: body.id, msg: ("" + body.name + ": $" + body.bank) });
-        }
+        this.setState({msg: body.msg});
       })
       .catch(error => console.error(error))
     }
 
     logIn = (e) => {
       e.preventDefault();
+      this.setState({delete: false});
       this.state.action = "log in";
       const body = JSON.stringify(this.state);
       const method = "POST"
       const headers = {'Content-Type': 'application/json'}
       
-      fetch("http://localhost:5000", {
+      fetch(process.env.REACT_APP_API, {
           method,
           headers,
           body
       })
       .then(response => response.json())
       .then(body => {
-        console.log(body.msg);
         if(body.msg == "wrong password") {
           this.setState({msg: "Incorrect Password"});
         } else if(body.msg == "Cannot read property 'password' of undefined") {
           this.setState({msg: "Cannot find user"});
+        } else if(body.msg == "user not found") {
+          this.setState({msg: "user not found"});
         } else {
-          console.log(body);
           this.setState({hidden: "visibility: hidden", userName: body.name, bank: body.bank, id: body.id, msg: ("" + body.name + ": $" + body.bank) });
         }
       })
@@ -75,25 +69,47 @@ class Home extends Component {
 
     delete = (e) => {
       e.preventDefault();
+      
       if(!this.state.delete) {
         this.setState({delete: true, msg: "Press delete again to confirm"});
+      } else {
+        this.state.action = "delete";
+        const body = JSON.stringify(this.state);
+        const method = "DELETE"
+        const headers = {'Content-Type': 'application/json'}
+        
+        fetch(process.env.REACT_APP_API, {
+            method,
+            headers,
+            body
+        })
+        .then(response => response.json())
+        .then(body => {
+          this.setState({msg: body.msg, delete: false})
+        })
       }
-      console.log("dele!");
     }
 
     handleChange = ({ target }) => {
-      this.setState({ [target.name]: target.value });
+      this.setState({ [target.name]: target.value, delete: false });
   };
 
 
     render() {
-      console.log(`${this.state.name} , ${this.state.password}`);
       //dostuff();
       return (
         <div>
           <h2>Home</h2>
-          <ul><Link to="/blackjack">blackjack</Link></ul>
-          <ul><Link to="/poker">Video Poker</Link></ul>
+          <ul><Link to={{ pathname: "/blackjack", state: {
+            userName: this.state.userName, 
+            bank: this.state.bank, 
+            id: this.state.id }
+           }} >blackjack</Link></ul>
+          <ul><Link to={{ pathname: "/poker", state: {
+            userName: this.state.userName, 
+            bank: this.state.bank, 
+            id: this.state.id }
+           }}>Video Poker</Link></ul>
           <ul><Link to="/highscores">Leader Board</Link></ul>
           <div Style={this.state.hidden}> 
             <form>

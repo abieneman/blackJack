@@ -24,7 +24,7 @@ class Scores extends Component {
 
     getDots(name, score) {
         let scoreStr = "" + score;
-        let dots = 100 - (name.length + scoreStr.length)
+        let dots = 40 - (name.length + scoreStr.length)
         let returnStr = "";
         if(dots > 0) {
             for(let i = 0; i < dots; i++) {
@@ -36,7 +36,7 @@ class Scores extends Component {
 
     componentDidMount() {
         console.log("hello there");
-        fetch("http://localhost:5000")
+        fetch(process.env.REACT_APP_API)
               .then(response => response.json())
               .then(body => this.setState({scores: body}))
               .then(hello => {

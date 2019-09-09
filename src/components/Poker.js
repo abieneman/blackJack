@@ -70,7 +70,12 @@ class Poker extends Component {
         myDeck: new Deck(),
         testString: "../images/cards/4H.jpg",
         turn: 0,
-        bank: 100,
+
+        bank: this.props.bank,
+        lastSavedBank: this.props.bank,
+        userName: this.props.userName,
+        id: this.props.id,
+
         bet: 1,
         initialized: false,
         payMessage: "Trade in cards",
@@ -242,6 +247,31 @@ class Poker extends Component {
         return "No Score";
     }
 
+    handleStartOver = (e) => {
+        e.preventDefault();
+        this.setState({bank: this.state.lastSavedBank});
+    }
+
+    handleSaveBank = (e) => {
+        e.preventDefault();
+        this.setState({lastSavedBank: this.state.bank })
+        if(this.state.id == -1) {
+            return;
+        }
+        let updateBank = { id: this.state.id, bank: this.state.bank };
+        const body = JSON.stringify(updateBank);
+        const method = "PUT"
+        const headers = {'Content-Type': 'application/json'}
+        
+        fetch(process.env.REACT_APP_API, {
+            method,
+            headers,
+            body
+        })
+        .then(response => response.json())
+        .catch(error => console.error(error))
+    }
+
     render() {
         if(!this.state.initialized) {
             this.initialize();
@@ -251,7 +281,7 @@ class Poker extends Component {
         }
         return(
             <div>
-                <p>Welcome to video poker!</p>
+                <p>Welcome to video poker, {this.state.userName}!</p>
                 <img name="one" src={this.Image[this.state.card1.getImageName()]} onClick={this.flip} width="10%" height="10%" alt="My Pic"></img>
                 <img name="two" src={this.Image[this.state.card2.getImageName()]} onClick={this.flip} width="10%" height="10%" alt="My Pic"></img>
                 <img name="three" src={this.Image[this.state.card3.getImageName()]} onClick={this.flip} width="10%" height="10%" alt="My Pic"></img>
@@ -270,6 +300,12 @@ class Poker extends Component {
                 </div>
                 <font color={this.state.payColor}>{"" + this.state.payMessage}</font>
                 <p>bank: {this.state.bank}</p>
+                <form onSubmit={this.handleStartOver}>
+                    <button>Load Last Saved bank</button>
+                </form>
+                <form onSubmit={this.handleSaveBank}>
+                    <button>Save Your Bank Progress</button>
+                </form>
             </div>
         );
     }
